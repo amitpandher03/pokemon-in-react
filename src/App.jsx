@@ -8,11 +8,12 @@ const App = () => {
   const [pokemons, setPokemons] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const fetchPokemons = async () => {
       try {
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100')
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=500')
         if (!response.ok) throw new Error('Failed to fetch')
         const data = await response.json()
         
@@ -34,6 +35,10 @@ const App = () => {
   }, [])
   
 
+  const filteredPokemons = pokemons.filter(pokemon =>
+    pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMessage error={error} />
 
@@ -44,8 +49,18 @@ const App = () => {
           Pokédex
         </h1>
         
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search Pokémon..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-md mx-auto block px-4 py-2 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {pokemons.map((pokemon) => (
+          {filteredPokemons.map((pokemon) => (
             <PokemonCard key={pokemon.name} pokemon={pokemon} />
           ))}
         </div>
