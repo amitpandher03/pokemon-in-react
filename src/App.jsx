@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PokemonCard from './components/PokemonCard'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorMessage from './components/ErrorMessage'
+import ReactPaginate from 'react-paginate'
 import './App.css'
 
 const App = () => {
@@ -9,6 +10,9 @@ const App = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [filteredPokemons, setFilteredPokemons] = useState([])
+  const [itemOffset, setItemOffset] = useState(0)
+  const itemsPerPage = 12 // Show 12 Pokémon per page
 
   useEffect(() => {
     const fetchPokemons = async () => {
@@ -35,9 +39,27 @@ const App = () => {
   }, [])
   
 
-  const filteredPokemons = pokemons.filter(pokemon =>
-    pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const filtered = pokemons.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      setFilteredPokemons(filtered)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm, pokemons])
+
+  const pageCount = Math.ceil(filteredPokemons.length / itemsPerPage)
+  const currentItems = filteredPokemons.slice(
+    itemOffset,
+    itemOffset + itemsPerPage
   )
+
+  const handlePageClick = (event) => {
+    const newOffset = (event.selected * itemsPerPage) % filteredPokemons.length
+    setItemOffset(newOffset)
+  }
 
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMessage error={error} />
@@ -60,10 +82,26 @@ const App = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPokemons.map((pokemon) => (
+          {currentItems.map((pokemon) => (
             <PokemonCard key={pokemon.name} pokemon={pokemon} />
           ))}
         </div>
+
+        <ReactPaginate
+          className="flex justify-center gap-2 mt-8"
+          pageClassName="px-3 py-2 rounded-lg bg-white hover:bg-gray-100 cursor-pointer"
+          activeClassName="!bg-blue-500 text-white"
+          previousClassName="px-3 py-2 rounded-lg bg-white hover:bg-gray-100 cursor-pointer"
+          nextClassName="px-3 py-2 rounded-lg bg-white hover:bg-gray-100 cursor-pointer"
+          disabledClassName="opacity-50 cursor-not-allowed"
+          breakClassName="px-3 py-2"
+          previousLabel="Previous"
+          nextLabel="Next"
+          pageCount={pageCount}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={2}
+          onPageChange={handlePageClick}
+        />
       </div>
     </div>
   )

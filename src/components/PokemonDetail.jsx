@@ -1,6 +1,12 @@
 const PokemonDetail = ({ pokemon, onClose }) => (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  <div 
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+    onClick={onClose}
+  >
+    <div 
+      className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      onClick={e => e.stopPropagation()}
+    >
       <div className="relative p-6">
         <button 
           onClick={onClose}
